@@ -21,10 +21,23 @@ services:
     environment:
       # If you want to set GPU or other config
       # OLLAMA_CUDA: "1"
-      OLLAMA_MODEL: "llama2-7b"
+      OLLAMA_MODEL: "deepseek-r1:7b"
       LOG_LEVEL: "INFO"
     volumes:
       - ./docker_data/ollama_models:/root/.ollama
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_API_BASE_URL=http://ollama:11434
+    volumes:
+      - ./docker_data/open-webui:/app/backend/data
+    depends_on:
+      - ollama
 
   # Optional: Rust CLI service
   #raggy-notes-cli:
