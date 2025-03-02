@@ -1,7 +1,8 @@
-use config::app_config::generate_xgd_config;
+use config::app_config::AppConfiguration;
 
 mod config;
 
 fn main() {
-    generate_xgd_config("/home/tomasz/notatki");
+    let config = AppConfiguration::new("/home/me/notes");
+    let _ = config.save();
 }
