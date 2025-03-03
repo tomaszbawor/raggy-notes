@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fs, fs::File, io::Write, path::PathBuf};
+use std::{error::Error, fs, path::PathBuf};
 use xdg::BaseDirectories;
 
 const DEFAULT_PREFIX: &str = "raggy_notes";
@@ -38,7 +38,7 @@ impl AppConfiguration {
         let xdg_dirs = BaseDirectories::with_prefix(prefix)?;
         let config_file_path = xdg_dirs
             .find_config_file("config.json")
-            .ok_or_else(|| "Config file not found")?;
+            .ok_or("Config file not found")?;
 
         let content = fs::read_to_string(config_file_path)?;
         let config: Self = serde_json::from_str(&content)?;
