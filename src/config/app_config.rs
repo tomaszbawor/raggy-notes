@@ -48,12 +48,13 @@ impl AppConfiguration {
 
 #[cfg(test)]
 mod tests {
+    use tempdir::TempDir;
+
     use super::*;
-    use tempfile::tempdir;
 
     #[test]
     fn test_configuration_save_and_load() {
-        let dir = tempdir().unwrap();
+        let dir = TempDir::new("tst").unwrap();
         let prefix = dir.path().to_str().unwrap();
 
         let original_config = AppConfiguration::new("/tmp/scan");
@@ -67,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_configuration_file_missing() {
-        let dir = tempdir().unwrap();
+        let dir = TempDir::new("tst").unwrap();
         let prefix = dir.path().to_str().unwrap();
 
         let result = AppConfiguration::load_from_xdg(prefix);

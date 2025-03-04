@@ -22,3 +22,19 @@ And then you need to download model
 ```bash
 docker exec -it ollama ollama run llama2
 ```
+
+## Nix development shell
+
+The file `flake.nix` creates dev environment with all needed tools for building the project.
+In order to get into the development env you may run.
+
+```bash
+nix develop
+```
+
+Then you should be able to build and test it.
+
+```bash
+cargo build 
+cargo test 
+```
