@@ -1,16 +1,11 @@
-use std::future::IntoFuture;
-
 use config::app_config::AppConfiguration;
-use rag::vectors::VectorDB;
+use rag::files::get_markdown_files;
 
 mod config;
 mod rag;
 
 #[tokio::main]
 async fn main() {
-    let config = AppConfiguration::new("/home/me/notes");
-    let _ = config.save();
-    let vector_db = VectorDB::new();
-    let call = vector_db.client.list_collections().into_future().await;
-    println!("{:?}", call)
+    let config = AppConfiguration::load().unwrap();
+    let _ = get_markdown_files(&config);
 }
