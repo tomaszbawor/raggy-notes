@@ -22,11 +22,18 @@ services:
     environment:
       # If you want to set GPU or other config
       # OLLAMA_CUDA: "1"
-      OLLAMA_MODEL: "deepseek-r1:7b"
+      OLLAMA_MODEL: "deepseek-r1:14b"
       LOG_LEVEL: "INFO"
     volumes:
       - ./docker_data/ollama_models:/root/.ollama
-
+      - ./docker/ollama-entrypoint.sh:/entrypoint.sh
+    entrypoint: ["./entrypoint.sh"]
+    deploy:
+      resources:
+        limits:
+          memory: 32G
+        reservations:
+          memory: 32G
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
