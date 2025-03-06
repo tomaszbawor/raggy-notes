@@ -11,6 +11,7 @@ pub fn get_markdown_files(config: &AppConfiguration) -> Result<Vec<PathBuf>, io:
     let mut markdown_files = Vec::new();
 
     let directory = read_dir(&config.scan_path)?;
+
     for entry in directory.flatten() {
         markdown_files.extend(extract_markdown_files(&entry)?);
     }
