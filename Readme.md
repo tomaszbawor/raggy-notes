@@ -17,11 +17,13 @@ force ollama to download model.
 docker compose up -d
 ```
 
-And then you need to download model
+Needed model will be dowloaded automaticly by the script `docker/ollama-entrypoint.sh`
+which will pull model provided in the `docker-compose.yaml` for the ollama service.
 
-```bash
-docker exec -it ollama ollama run deepseek-r1:14b
-```
+### Local Links for docker compose services
+
+- [OpenUi](http://localhost:3000)
+- [Qdrant UI](http://localhost:6333/dashboard)
 
 ## Nix development shell
 
