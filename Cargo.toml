@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.31", features = ["derive"] }
+env_logger = "0.11.6"
+log = "0.4.26"
 ollama-rs = "0.2.6"
 qdrant-client = "1.13.0"
 serde = {version = "1.0.218", features = ["derive"] }
