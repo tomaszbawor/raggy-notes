@@ -20,7 +20,7 @@ docker compose up -d
 And then you need to download model
 
 ```bash
-docker exec -it ollama ollama run llama2
+docker exec -it ollama ollama run deepseek-r1:14b
 ```
 
 ## Nix development shell

@@ -13,4 +13,8 @@ impl VectorDB {
             .expect("Unable to connect to qdrant db");
         Self { client }
     }
+
+    pub fn test_connection() {
+        todo!("Implement");
+    }
 }

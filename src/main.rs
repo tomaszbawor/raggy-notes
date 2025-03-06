@@ -6,8 +6,13 @@ mod rag;
 
 #[tokio::main]
 async fn main() {
+    // Loading config
     let config = AppConfiguration::load().unwrap();
-    let _ = get_markdown_files(&config);
+
+    // get files:
+    let files_to_embed = get_markdown_files(&config);
+
+    // VectorDb connection
     let vector_db = VectorDB::new();
     let a = vector_db.client.list_collections().await;
     println!("{:?}", a.unwrap())
