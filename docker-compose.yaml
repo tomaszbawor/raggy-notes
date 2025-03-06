@@ -8,6 +8,7 @@ services:
     volumes:
       - ./docker_data/qdrant_data:/qdrant/storage
     ports:
+      - "6334:6334"
       - "6333:6333"
     environment:
       QDRANT__LOG_LEVEL: "INFO"
