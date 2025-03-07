@@ -29,7 +29,7 @@ fn extract_markdown_files(dir_entry: &DirEntry) -> Result<Vec<PathBuf>, io::Erro
         }
     } else if let Some(ext) = dir_entry.path().extension() {
         if ext == "md" {
-            println!("Found markdown file: {:?}", dir_entry.path());
+            // println!("Found markdown file: {:?}", dir_entry.path());
             markdown_files.push(dir_entry.path());
         }
     }
