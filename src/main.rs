@@ -1,10 +1,14 @@
 use config::app_config::AppConfiguration;
 use llama::consts;
+use llama::consts::AI_MODEL;
 use log::error;
 use log::info;
+use ollama_rs::generation::embeddings::request::EmbeddingsInput;
+use ollama_rs::generation::embeddings::request::GenerateEmbeddingsRequest;
 use ollama_rs::{generation::completion::request::GenerationRequest, Ollama};
 
 use prelude::*;
+use qdrant_client::qdrant::CreateCollection;
 use rag::{files::get_markdown_files, vectors::VectorDB};
 
 mod config;
@@ -31,6 +35,7 @@ async fn main() -> Result<()> {
         Ok(_) => info!("Qdrant connection established "),
         Err(_) => error!("Problem with qdrant connection"),
     }
+    //vector_db.initialize_collections().await;
 
     let llama_client = Ollama::new("http://localhost", 11434);
 
@@ -40,7 +45,25 @@ async fn main() -> Result<()> {
         .iter()
         .map(|loc_model| loc_model.name.to_owned())
         .collect();
-    println!("LLM Models availible: {}", models_name_list.join(", "));
+
+    info!("LLM Models availible: [{}]", models_name_list.join(", "));
+    let emb = llama_client
+        .generate_embeddings(GenerateEmbeddingsRequest::new(
+            AI_MODEL.to_string(),
+            EmbeddingsInput::Single("My name is Tomasz".to_string()),
+        ))
+        .await;
+
+    vector_db.save_vector().await;
+
+    match emb {
+        Ok(res) => {
+            info!("I have embeddings: {}", res.embeddings.len());
+        }
+        Err(_) => {
+            error!("Unable to make embedding");
+        }
+    };
     // Example Ollama query
     /*
     let req = GenerationRequest::new(
