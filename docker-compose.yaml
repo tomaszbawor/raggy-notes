@@ -14,7 +14,7 @@ services:
       QDRANT__LOG_LEVEL: "INFO"
 
   ollama:
-    image: ollama/ollama:0.5.12
+    image: ollama/ollama:0.6.3
     container_name: ollama
     restart: unless-stopped
     ports:
