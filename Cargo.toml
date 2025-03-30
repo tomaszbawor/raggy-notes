@@ -7,7 +7,7 @@ edition = "2021"
 clap = { version = "4.5.31", features = ["derive"] }
 env_logger = "0.11.6"
 log = "0.4.26"
-ollama-rs = "0.2.6"
+ollama-rs = "0.3.0"
 qdrant-client = "1.13.0"
 serde = {version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.139"
