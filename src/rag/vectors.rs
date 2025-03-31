@@ -1,5 +1,4 @@
 use log::{error, info};
-use qdrant_client::qdrant::qdrant_client::QdrantClient;
 use qdrant_client::qdrant::{
     CreateCollection, CreateCollectionBuilder, Distance, PointStruct, ScoredPoint, SearchPoints,
     SearchResponse, UpsertPointsBuilder, VectorParams, VectorsConfig, VectorsConfigBuilder,
@@ -13,7 +12,7 @@ use crate::llama::consts::EMBEDDING_SIZE;
 use crate::prelude::*;
 use std::path::PathBuf;
 
-pub const NOTES_QDRANT_COLLECTION_NAME: &str = "notes";
+pub const NOTES_QDRANT_COLLECTION_NAME: &str = "private_notes";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NotePayload {

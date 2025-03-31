@@ -8,7 +8,7 @@ use std::fs;
 use std::path::PathBuf;
 
 pub mod consts {
-    pub const AI_MODEL: &str = "deepseek-r1:14b";
+    pub const AI_MODEL: &str = "deepseek-r1:7b";
     pub const EMBEDDING_MODEL: &str = "nomic-embed-text"; // or another appropriate embedding model
     pub const EMBEDDING_SIZE: usize = 768; // Update this to match your model's embedding size
 }

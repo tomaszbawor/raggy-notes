@@ -20,7 +20,7 @@ services:
     environment:
       # If you want to set GPU or other config
       # OLLAMA_CUDA: "1"
-      OLLAMA_MODEL: "mistral:latest,nomic-embed-text:latest"
+      OLLAMA_MODEL: "deepseek-r1:7b,nomic-embed-text:latest"
     volumes:
       - ./docker_data/ollama_models:/root/.ollama
       - ./docker/ollama-entrypoint.sh:/entrypoint.sh
@@ -47,17 +47,17 @@ services:
       - ollama
 
   # Raggy Notes service
-  raggy-notes:
-    build: .
-    container_name: raggy-notes
-    volumes:
-      - ./notes:/app/notes  # Mount local notes directory
-      - ./docker_data/raggy_notes_config:/root/.config/raggy_notes  # Configuration storage
-    environment:
-      - RUST_LOG=info
-    depends_on:
-      - qdrant
-      - ollama
-    command: ["sleep", "infinity"]
+  # raggy-notes:
+  #   build: .
+  #   container_name: raggy-notes
+  #   volumes:
+  #     - ./notes:/app/notes  # Mount local notes directory
+  #     - ./docker_data/raggy_notes_config:/root/.config/raggy_notes  # Configuration storage
+  #   environment:
+  #     - RUST_LOG=info
+  #   depends_on:
+  #     - qdrant
+  #     - ollama
+  #   command: ["sleep", "infinity"]
     # For interactive use, you can uncomment this and use docker exec:
     # docker exec -it raggy-notes /app/raggy-notes

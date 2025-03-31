@@ -1,42 +1,108 @@
-# Raggy notes
+# Raggy Notes
 
-Goal of this project is to mimic that I can program in Rust
-and I know what I am doing by trying using OpenAI models
-to help me design the system and learn about RAG, RUST
-and other fancy words that are trendy right now.
+A Rust-based TUI application for semantic search and note management using RAG (Retrieval-Augmented Generation).
 
-> [!WARNING]
-> This is not even for personal use, this is just a POC
+## Features
 
-## Docker Hosting
+- 📝 Manage and search your markdown notes with semantic search
+- 🧠 Interact with AI models to ask questions about your notes
+- 🔍 Find relevant information using natural language queries
+- 🖥️ Terminal-based user interface for fast, keyboard-driven workflows
 
-In order to start ollama you need to run docker compose and then
-force ollama to download model.
+## Architecture
+
+Raggy Notes uses:
+
+- **Ollama**: Local LLM for text generation and embeddings
+- **Qdrant**: Vector database for storing and searching embeddings
+- **Ratatui**: Terminal UI framework for the interface
+- **Tokio**: Async runtime for efficient concurrent operations
+
+## Getting Started
+
+### Prerequisites
+
+- Rust toolchain (1.74+)
+- Docker and Docker Compose (for Ollama and Qdrant)
+
+### Quick Start
+
+1. **Start the infrastructure services**:
 
 ```bash
 docker compose up -d
 ```
 
-Needed model will be dowloaded automaticly by the script `docker/ollama-entrypoint.sh`
-which will pull model provided in the `docker-compose.yaml` for the ollama service.
+2. **Build the application**:
 
-### Local Links for docker compose services
+```bash
+cargo build --release
+```
 
-- [OpenUi](http://localhost:3000)
-- [Qdrant UI](http://localhost:6333/dashboard)
+3. **Initialize the configuration**:
 
-## Nix development shell
+```bash
+./target/release/raggy-notes init --scan-path /path/to/your/markdown/notes
+```
 
-The file `flake.nix` creates dev environment with all needed tools for building the project.
-In order to get into the development env you may run.
+4. **Index your notes**:
+
+```bash
+./target/release/raggy-notes index
+```
+
+5. **Start the application**:
+
+```bash
+./target/release/raggy-notes
+```
+
+## Usage
+
+### Navigation
+
+- `Tab`: Switch between tabs (Chat, Search, Settings)
+- `Ctrl+Q` or `Ctrl+C`: Quit
+- `Enter`: Send message/execute search
+- `Up/Down`: Navigate search results
+
+### Tabs
+
+- **Chat**: Interact with the AI model
+- **Search**: Search your notes semantically
+- **Settings**: Configure application settings
+
+## Docker Support
+
+You can run the entire application stack with Docker Compose:
+
+```bash
+docker compose up -d
+docker exec -it raggy-notes /app/raggy-notes init --scan-path /app/notes
+docker exec -it raggy-notes /app/raggy-notes index
+docker exec -it raggy-notes /app/raggy-notes
+```
+
+## Development
+
+### Environment Setup
+
+The project includes a Nix flake for development:
 
 ```bash
 nix develop
 ```
 
-Then you should be able to build and test it.
+### Project Structure
 
-```bash
-cargo build 
-cargo test 
-```
+- `src/`
+  - `config/`: Application configuration
+  - `llama/`: Ollama client integration
+  - `rag/`: RAG implementation (files, vector DB)
+  - `tui/`: Terminal UI components
+  - `error.rs`: Error handling
+  - `main.rs`: Application entry point
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
