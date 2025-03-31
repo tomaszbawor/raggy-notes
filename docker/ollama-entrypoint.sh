@@ -14,9 +14,16 @@ pid=$!
 # Pause for Ollama to start.
 sleep 5
 
-echo "Retrieving model"
-ollama pull $OLLAMA_MODEL
-echo "Done."
+# Get models list from environment variable
+IFS=',' read -ra MODELS <<<"$OLLAMA_MODEL"
+
+echo "Retrieving models..."
+for MODEL in "${MODELS[@]}"; do
+  echo "Pulling model: $MODEL"
+  ollama pull $MODEL
+  echo "Model $MODEL downloaded successfully."
+done
+echo "All models downloaded."
 
 # Wait for Ollama process to finish.
 wait $pid
