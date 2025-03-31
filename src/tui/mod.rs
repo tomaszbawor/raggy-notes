@@ -18,7 +18,7 @@ use ratatui::{
 use crate::{error::AppError, llama::LlamaService};
 use crate::{
     prelude::Result,
-    rag::vectors::{NoteVector, VectorDB},
+    rag::vectors::VectorDB,
 };
 
 pub struct App {
@@ -318,7 +318,7 @@ fn ui(f: &mut Frame, app: &App) {
         .split(f.size());
 
     // Render tab bar
-    let tabs = vec!["Chat", "Search", "Settings"];
+    let tabs = ["Chat", "Search", "Settings"];
     let tab_items: Vec<Line> = tabs
         .iter()
         .enumerate()
@@ -339,10 +339,10 @@ fn ui(f: &mut Frame, app: &App) {
 
             Line::from(vec![
                 Span::styled(
-                    format!("{}", first),
+                    first.to_string(),
                     style.add_modifier(Modifier::UNDERLINED),
                 ),
-                Span::styled(format!("{}", rest), style),
+                Span::styled(rest.to_string(), style),
             ])
         })
         .collect();

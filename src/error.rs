@@ -1,9 +1,7 @@
-use ollama_rs::error::OllamaError;
 use qdrant_client::QdrantError;
 // src/error.rs
 use thiserror::Error;
 
-use crate::tui::App;
 
 #[derive(Error, Debug)]
 pub enum AppError {

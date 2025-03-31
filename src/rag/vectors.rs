@@ -1,7 +1,7 @@
-use log::{error, info};
+use log::info;
 use qdrant_client::qdrant::{
-    CreateCollection, CreateCollectionBuilder, Distance, PointStruct, ScoredPoint, SearchPoints,
-    SearchResponse, UpsertPointsBuilder, VectorParams, VectorsConfig, VectorsConfigBuilder,
+    CreateCollectionBuilder, Distance, PointStruct, SearchPoints,
+    SearchResponse, UpsertPointsBuilder, VectorParams, VectorsConfig,
     WithPayloadSelector, WithVectorsSelector,
 };
 use qdrant_client::{Payload, Qdrant};

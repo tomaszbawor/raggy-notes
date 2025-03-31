@@ -1,7 +1,6 @@
 // src/rag/files.rs
 use std::{
-    fs::{read_dir, read_to_string, DirEntry},
-    io,
+    fs::{read_dir, DirEntry},
     path::PathBuf,
 };
 
