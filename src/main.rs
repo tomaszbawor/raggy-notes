@@ -19,7 +19,6 @@ async fn main() -> Result<()> {
     initialize_logging();
     info!("Application starting ...");
 
-    // Loading config
     let config = AppConfiguration::load().unwrap();
     info!("Configuration loaded.");
 

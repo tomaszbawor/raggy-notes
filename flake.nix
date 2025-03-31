@@ -15,8 +15,14 @@
       in {
         devShells.default = with pkgs;
           mkShell {
-            buildInputs =
-              [ openssl pkg-config eza fd rust-bin.beta.latest.default ];
+            buildInputs = [
+              openssl
+              openssl.dev
+              pkg-config
+              eza
+              fd
+              rust-bin.beta.latest.default
+            ];
 
             shellHook = ''
               alias ls=eza
