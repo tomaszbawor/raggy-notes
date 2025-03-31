@@ -20,8 +20,7 @@ services:
     environment:
       # If you want to set GPU or other config
       # OLLAMA_CUDA: "1"
-      OLLAMA_MODEL: "deepseek-r1:14b"
-      LOG_LEVEL: "INFO"
+      OLLAMA_MODEL: "mistral"
     volumes:
       - ./docker_data/ollama_models:/root/.ollama
       - ./docker/ollama-entrypoint.sh:/entrypoint.sh

@@ -1,16 +1,12 @@
-use std::error::Error;
-
 use config::app_config::AppConfiguration;
-use llama::consts;
 use llama::consts::AI_MODEL;
 use log::error;
 use log::info;
 use ollama_rs::generation::embeddings::request::EmbeddingsInput;
 use ollama_rs::generation::embeddings::request::GenerateEmbeddingsRequest;
-use ollama_rs::{generation::completion::request::GenerationRequest, Ollama};
+use ollama_rs::Ollama;
 
 use prelude::*;
-use qdrant_client::qdrant::CreateCollection;
 use rag::{files::get_markdown_files, vectors::VectorDB};
 
 mod config;
@@ -67,6 +63,7 @@ async fn main() -> Result<()> {
         }
     };
     // Example Ollama query
+
     /*
     let req = GenerationRequest::new(
         consts::AI_MODEL.to_string(),
