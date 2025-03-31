@@ -9,10 +9,16 @@ pub struct AppConfiguration {
     pub scan_path: String,
 }
 
+impl Default for AppConfiguration {
+    fn default() -> Self {
+        Self::new(DEFAULT_PREFIX)
+    }
+}
+
 impl AppConfiguration {
-    pub fn new(scan_path: &str) -> Self {
+    pub fn new(scan_path: impl Into<String>) -> Self {
         Self {
-            scan_path: scan_path.to_owned(),
+            scan_path: scan_path.into(),
         }
     }
 

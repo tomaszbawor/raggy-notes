@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use config::app_config::AppConfiguration;
 use llama::consts;
 use llama::consts::AI_MODEL;
@@ -35,7 +37,7 @@ async fn main() -> Result<()> {
         Ok(_) => info!("Qdrant connection established "),
         Err(_) => error!("Problem with qdrant connection"),
     }
-    //vector_db.initialize_collections().await;
+    vector_db.initialize_collections().await;
 
     let llama_client = Ollama::new("http://localhost", 11434);
 
@@ -60,7 +62,7 @@ async fn main() -> Result<()> {
         Ok(res) => {
             info!("I have embeddings: {}", res.embeddings.len());
         }
-        Err(_) => {
+        Err(_err) => {
             error!("Unable to make embedding");
         }
     };

@@ -4,13 +4,16 @@ use std::{
     path::PathBuf,
 };
 
+use log::info;
+
 use crate::config::app_config::AppConfiguration;
 
 /// Retrieves all markdown files from the configured directory.
 pub fn get_markdown_files(config: &AppConfiguration) -> Result<Vec<PathBuf>, io::Error> {
     let mut markdown_files = Vec::new();
+    dbg!(config);
 
-    let directory = read_dir(&config.scan_path)?;
+    let directory = read_dir(&config.scan_path).expect("No files in notes path");
 
     for entry in directory.flatten() {
         markdown_files.extend(extract_markdown_files(&entry)?);
