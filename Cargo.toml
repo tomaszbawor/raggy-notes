@@ -18,7 +18,7 @@ ratatui = "0.26.0"
 crossterm = "0.27.0"
 thiserror = "1.0.69"
 chrono = { version = "0.4.35", features = ["serde"] }
-directories = "5.0.1"
+directories = "6.0.0"
 
 [dev-dependencies]
 tempdir = "0.3.7"
