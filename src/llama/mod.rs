@@ -65,4 +65,69 @@ impl LlamaService {
 
         Ok((title, content))
     }
+    pub async fn generate_rag_completion(
+        &self,
+        user_query: &str,
+        vector_db: &crate::rag::vectors::VectorDB,
+    ) -> Result<String> {
+        // Step 1: Generate embedding for the user query
+        let embedding = self.get_embedding(user_query).await?;
+
+        // Step 2: Search for relevant notes using the embedding
+        let search_results = vector_db.search_similar_notes(embedding, 5).await?;
+
+        // Step 3: Prepare context from relevant notes
+        let mut context = String::new();
+
+        if search_results.result.is_empty() {
+            context = "No relevant notes found.".to_string();
+        } else {
+            context.push_str("Here are some relevant notes from your knowledge base:\n\n");
+
+            for (i, point) in search_results.result.iter().enumerate() {
+                // Extract title and content from payload
+                let title = point.payload.get("title")
+                    .and_then(|v| v.as_str())
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "Untitled".to_string());
+
+                let content = point.payload.get("content")
+                    .and_then(|v| v.as_str())
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "No content".to_string());
+
+                // Add a snippet of the note content (to avoid exceeding context window)
+                let content_snippet = if content.len() > 500 {
+                    format!("{}...", &content[..500])
+                } else {
+                    content.to_string()
+                };
+
+                // Add to context
+                context.push_str(&format!("Note {}: {} (relevance: {:.2})\n{}\n\n",
+                                          i + 1,
+                                          title,
+                                          point.score,
+                                          content_snippet
+                ));
+            }
+        }
+
+        // Step 4: Build the augmented prompt
+        let augmented_prompt = format!(
+            "You are a helpful AI assistant with access to the user's notes. \
+        Answer the following question using the provided notes when relevant. \
+        If the notes don't contain relevant information, just answer based on your knowledge.\n\n\
+        {}\n\n\
+        User question: {}\n\
+        Helpful answer:",
+            context,
+            user_query
+        );
+
+        // Step 5: Generate completion with the augmented prompt
+        let response = self.generate_completion(&augmented_prompt).await?;
+
+        Ok(response)
+    }
 }

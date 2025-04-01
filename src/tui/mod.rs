@@ -264,11 +264,19 @@ async fn run_ui<B: Backend>(
                             Tab::Chat => {
                                 if !app.input.is_empty() {
                                     let user_message = app.submit_message();
+                                    app.set_status("Thinking...");
 
-                                    // Process response asynchronously
-                                    let response =
-                                        llama_service.generate_completion(&user_message).await?;
-                                    app.add_ai_response(response);
+                                    // Use RAG-enhanced completion
+                                    match llama_service.generate_rag_completion(&user_message, vector_db).await {
+                                        Ok(response) => {
+                                            app.add_ai_response(response);
+                                        },
+                                        Err(e) => {
+                                            app.add_ai_response(format!("Error generating response: {}", e));
+                                        }
+                                    }
+
+                                    app.clear_status();
                                 }
                             }
                             Tab::Search => {
