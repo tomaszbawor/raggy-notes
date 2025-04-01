@@ -6,6 +6,8 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use qdrant_client::prelude::point_id::PointIdOptions;
+use qdrant_client::qdrant::PointId;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Direction, Layout},
@@ -16,10 +18,7 @@ use ratatui::{
 };
 
 use crate::{error::AppError, llama::LlamaService};
-use crate::{
-    prelude::Result,
-    rag::vectors::VectorDB,
-};
+use crate::{prelude::Result, rag::vectors::VectorDB};
 
 pub struct App {
     pub input: String,
@@ -275,19 +274,98 @@ async fn run_ui<B: Backend>(
                             Tab::Search => {
                                 if !app.input.is_empty() {
                                     let search_query = app.submit_message();
+                                    app.set_status("Searching...");
+                                    app.clear_search_results();
 
                                     // Get embedding for search query
-                                    let embedding =
-                                        llama_service.get_embedding(&search_query).await?;
+                                    match llama_service.get_embedding(&search_query).await {
+                                        Ok(embedding) => {
+                                            // Search for similar notes
+                                            match vector_db
+                                                .search_similar_notes(embedding, 10)
+                                                .await
+                                            {
+                                                Ok(results) => {
+                                                    if results.result.is_empty() {
+                                                        app.add_ai_response("No relevant notes found for your query.".into());
+                                                    } else {
+                                                        app.add_ai_response(format!(
+                                                            "Found {} relevant notes.",
+                                                            results.result.len()
+                                                        ));
 
-                                    // Search for similar notes
-                                    //TODO:
-                                    //let results =
-                                    //   vector_db.search_similar_notes(embedding, 5).await?;
+                                                        // Process search results
+                                                        for point in results.result {
 
-                                    //TODO:  Convert results to NoteVector
-                                    // (placeholder - needs to be implemented properly)
-                                    //app.add_ai_response(format!("Found {:?} results", results));
+
+                                                            let title = point
+                                                                .payload
+                                                                .get("title")
+                                                                .and_then(|v| v.as_str())
+                                                                .map(|v| v.to_string())
+                                                                .unwrap_or_else(|| {
+                                                                    "Untitled".to_string()
+                                                                });
+
+                                                            let content = point
+                                                                .payload
+                                                                .get("content")
+                                                                .and_then(|v| v.as_str())
+                                                                .map(|v| v.to_string())
+                                                                .unwrap_or_else(|| {
+                                                                    "No content".to_string()
+                                                                });
+
+                                                            let file_path = point
+                                                                .payload
+                                                                .get("file_path")
+                                                                .and_then(|v| v.as_str())
+                                                                .map(|v| v.to_string())
+                                                                .unwrap_or_else(|| {
+                                                                    "Unknown path".to_string()
+                                                                });
+
+                                                            let id  =  match point.id.map(|id| id.point_id_options).flatten() {
+                                                                None => "Unknown ID".to_string(),
+                                                                Some(id_opt) => match id_opt {
+                                                                    PointIdOptions::Num(num) => num.to_string(),
+                                                                    PointIdOptions::Uuid(uid) => uid,
+                                                                }
+                                                            };
+
+                                                            // Add to search results
+                                                            app.add_search_result(
+                                                                id,
+                                                                title,
+                                                                content,
+                                                                point.score,
+                                                                file_path,
+                                                            );
+                                                        }
+
+                                                        // Select first result by default
+                                                        if !app.search_results.is_empty() {
+                                                            app.selected_result = Some(0);
+                                                        }
+                                                    }
+                                                }
+                                                Err(e) => {
+                                                    app.add_ai_response(format!(
+                                                        "Error searching notes: {}",
+                                                        e
+                                                    ));
+                                                }
+                                            }
+                                        }
+                                        Err(e) => {
+                                            app.add_ai_response(format!(
+                                                "Error generating embedding: {}",
+                                                e
+                                            ));
+                                        }
+                                    }
+
+                                    app.clear_status();
                                 }
                             }
                             Tab::Settings => {
@@ -338,10 +416,7 @@ fn ui(f: &mut Frame, app: &App) {
             };
 
             Line::from(vec![
-                Span::styled(
-                    first.to_string(),
-                    style.add_modifier(Modifier::UNDERLINED),
-                ),
+                Span::styled(first.to_string(), style.add_modifier(Modifier::UNDERLINED)),
                 Span::styled(rest.to_string(), style),
             ])
         })

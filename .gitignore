@@ -2,3 +2,4 @@
 /docker_data
 /docker/zscaler.crt
 /.direnv
+.idea/
