@@ -1,8 +1,7 @@
 use log::info;
 use qdrant_client::qdrant::{
-    CreateCollectionBuilder, Distance, PointStruct, SearchPoints,
-    SearchResponse, UpsertPointsBuilder, VectorParams, VectorsConfig,
-    WithPayloadSelector, WithVectorsSelector,
+    CreateCollectionBuilder, Distance, PointStruct, SearchPoints, SearchResponse,
+    UpsertPointsBuilder, VectorParams, VectorsConfig, WithPayloadSelector, WithVectorsSelector,
 };
 use qdrant_client::{Payload, Qdrant};
 use serde::{Deserialize, Serialize};
@@ -145,17 +144,27 @@ impl VectorDB {
         info!("Successfully saved vector with id: {}", note_vector.id);
         Ok(())
     }
-
     pub async fn search_similar_notes(
         &self,
-        query_vector: Vec<f32>,
+        query_embedding: Vec<Vec<f32>>,
         limit: u64,
     ) -> Result<SearchResponse> {
+        // Ensure we have an embedding to work with
+        if query_embedding.is_empty() || query_embedding[0].is_empty() {
+            return Err(AppError::VectorDBError(
+                "Empty query embedding provided".into(),
+            ));
+        }
+
+        // Use the first vector from the embedding array
+        // This is because Ollama's embedding API returns multiple vectors but we only need one for search
+        let vector_to_search = query_embedding[0].clone();
+
         let search_result = self
             .client
             .search_points(SearchPoints {
                 collection_name: NOTES_QDRANT_COLLECTION_NAME.to_string(),
-                vector: query_vector,
+                vector: vector_to_search,
                 limit,
                 with_payload: Some(WithPayloadSelector {
                     selector_options: Some(
