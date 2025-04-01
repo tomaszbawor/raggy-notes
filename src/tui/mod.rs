@@ -33,6 +33,7 @@ pub struct App {
 pub struct SearchResult {
     pub id: String,
     pub title: String,
+    pub content: String,
     pub content_preview: String,
     pub score: f32,
     pub file_path: String,
@@ -65,6 +66,47 @@ impl App {
         self.status_message = None;
     }
 
+    pub fn next_result(&mut self) {
+        if !self.search_results.is_empty() {
+            match self.selected_result {
+                Some(idx) if idx < self.search_results.len() - 1 => {
+                    self.selected_result = Some(idx + 1);
+                }
+                None => {
+                    self.selected_result = Some(0);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    pub fn previous_result(&mut self) {
+        if !self.search_results.is_empty() {
+            match self.selected_result {
+                Some(idx) if idx > 0 => {
+                    self.selected_result = Some(idx - 1);
+                }
+                None => {
+                    self.selected_result = Some(self.search_results.len() - 1);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    pub fn view_full_content(&self) -> Option<String> {
+        match self.selected_result {
+            Some(idx) => self.search_results.get(idx).map(|result| {
+                format!(
+                    "# {}\n\nPath: {}\n\n{}",
+                    result.title,
+                    result.file_path,
+                    result.content_preview
+                )
+            }),
+            None => None,
+        }
+    }
     pub fn add_search_result(
         &mut self,
         id: String,
@@ -77,12 +119,13 @@ impl App {
         let content_preview = if content.len() > 100 {
             format!("{}...", &content[..100])
         } else {
-            content
+            content.clone()
         };
 
         self.search_results.push(SearchResult {
             id,
             title,
+            content,
             content_preview,
             score,
             file_path,
@@ -144,6 +187,7 @@ impl App {
             Tab::Settings => Tab::Search,
         }
     }
+
 }
 
 pub async fn run_app(llama_service: &LlamaService, vector_db: &VectorDB) -> Result<()> {
@@ -250,6 +294,17 @@ async fn run_ui<B: Backend>(
                     KeyCode::Left => {
                         app.move_cursor_left();
                     }
+
+                    KeyCode::Up => {
+                        if matches!(app.selected_tab, Tab::Search) {
+                            app.previous_result();
+                        }
+                    },
+                    KeyCode::Down => {
+                        if matches!(app.selected_tab, Tab::Search) {
+                            app.next_result();
+                        }
+                    }
                     KeyCode::Right => {
                         app.move_cursor_right();
                     }
@@ -265,6 +320,9 @@ async fn run_ui<B: Backend>(
                                 if !app.input.is_empty() {
                                     let user_message = app.submit_message();
                                     app.set_status("Thinking...");
+
+                                    // Redraw UI
+                                    terminal.draw(|f| ui(f, app))?;
 
                                     // Use RAG-enhanced completion
                                     match llama_service.generate_rag_completion(&user_message, vector_db).await {
@@ -284,6 +342,8 @@ async fn run_ui<B: Backend>(
                                     let search_query = app.submit_message();
                                     app.set_status("Searching...");
                                     app.clear_search_results();
+
+                                    terminal.draw(|f| ui(f, app))?;
 
                                     // Get embedding for search query
                                     match llama_service.get_embedding(&search_query).await {
@@ -504,18 +564,27 @@ fn ui(f: &mut Frame, app: &App) {
             // Render preview of the selected result
             let preview_content = if let Some(selected_idx) = app.selected_result {
                 if let Some(selected_result) = app.search_results.get(selected_idx) {
-                    vec![
-                        Line::from(vec![
-                            Span::styled("Title: ", Style::default().add_modifier(Modifier::BOLD)),
-                            Span::raw(&selected_result.title),
-                        ]),
-                        Line::from(vec![
-                            Span::styled("File: ", Style::default().add_modifier(Modifier::BOLD)),
-                            Span::raw(&selected_result.file_path),
-                        ]),
-                        Line::from(Span::raw("")), // Empty line
-                        Line::from(Span::raw(&selected_result.content_preview)),
-                    ]
+                    let mut content_lines = Vec::new();
+                    content_lines.push(Line::from(vec![
+                        Span::styled("Title: ", Style::default().add_modifier(Modifier::BOLD)),
+                        Span::raw(&selected_result.title),
+                    ]));
+                    content_lines.push(Line::from(vec![
+                        Span::styled("File: ", Style::default().add_modifier(Modifier::BOLD)),
+                        Span::raw(&selected_result.file_path),
+                    ]));
+                    content_lines.push(Line::from(vec![
+                        Span::styled("Score: ", Style::default().add_modifier(Modifier::BOLD)),
+                        Span::raw(format!("{:.2}", selected_result.score)),
+                    ]));
+                    content_lines.push(Line::from(Span::raw(""))); // Empty line
+
+                    // Add full content with line breaks preserved
+                    for content_line in selected_result.content.lines() {
+                        content_lines.push(Line::from(Span::raw(content_line)));
+                    }
+
+                    content_lines
                 } else {
                     vec![Line::from("No result selected")]
                 }
