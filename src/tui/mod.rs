@@ -7,7 +7,6 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use qdrant_client::prelude::point_id::PointIdOptions;
-use qdrant_client::qdrant::PointId;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Direction, Layout},
@@ -99,9 +98,7 @@ impl App {
             Some(idx) => self.search_results.get(idx).map(|result| {
                 format!(
                     "# {}\n\nPath: {}\n\n{}",
-                    result.title,
-                    result.file_path,
-                    result.content_preview
+                    result.title, result.file_path, result.content_preview
                 )
             }),
             None => None,
@@ -187,7 +184,6 @@ impl App {
             Tab::Settings => Tab::Search,
         }
     }
-
 }
 
 pub async fn run_app(llama_service: &LlamaService, vector_db: &VectorDB) -> Result<()> {
@@ -299,7 +295,8 @@ async fn run_ui<B: Backend>(
                         if matches!(app.selected_tab, Tab::Search) {
                             app.previous_result();
                         }
-                    },
+                    }
+
                     KeyCode::Down => {
                         if matches!(app.selected_tab, Tab::Search) {
                             app.next_result();
@@ -320,17 +317,22 @@ async fn run_ui<B: Backend>(
                                 if !app.input.is_empty() {
                                     let user_message = app.submit_message();
                                     app.set_status("Thinking...");
-
                                     // Redraw UI
                                     terminal.draw(|f| ui(f, app))?;
 
                                     // Use RAG-enhanced completion
-                                    match llama_service.generate_rag_completion(&user_message, vector_db).await {
+                                    match llama_service
+                                        .generate_rag_completion(&user_message, vector_db)
+                                        .await
+                                    {
                                         Ok(response) => {
                                             app.add_ai_response(response);
-                                        },
+                                        }
                                         Err(e) => {
-                                            app.add_ai_response(format!("Error generating response: {}", e));
+                                            app.add_ai_response(format!(
+                                                "Error generating response: {}",
+                                                e
+                                            ));
                                         }
                                     }
 
@@ -364,8 +366,6 @@ async fn run_ui<B: Backend>(
 
                                                         // Process search results
                                                         for point in results.result {
-
-
                                                             let title = point
                                                                 .payload
                                                                 .get("title")
@@ -393,12 +393,20 @@ async fn run_ui<B: Backend>(
                                                                     "Unknown path".to_string()
                                                                 });
 
-                                                            let id  =  match point.id.map(|id| id.point_id_options).flatten() {
+                                                            let id = match point
+                                                                .id
+                                                                .map(|id| id.point_id_options)
+                                                                .flatten()
+                                                            {
                                                                 None => "Unknown ID".to_string(),
                                                                 Some(id_opt) => match id_opt {
-                                                                    PointIdOptions::Num(num) => num.to_string(),
-                                                                    PointIdOptions::Uuid(uid) => uid,
-                                                                }
+                                                                    PointIdOptions::Num(num) => {
+                                                                        num.to_string()
+                                                                    }
+                                                                    PointIdOptions::Uuid(uid) => {
+                                                                        uid
+                                                                    }
+                                                                },
                                                             };
 
                                                             // Add to search results

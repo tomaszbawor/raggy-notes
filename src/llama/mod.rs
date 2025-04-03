@@ -8,7 +8,7 @@ use std::fs;
 use std::path::PathBuf;
 
 pub mod consts {
-    pub const AI_MODEL: &str = "deepseek-r1:7b";
+    pub const AI_MODEL: &str = "gemma3:4b";
     pub const EMBEDDING_MODEL: &str = "nomic-embed-text"; // or another appropriate embedding model
     pub const EMBEDDING_SIZE: usize = 768; // Update this to match your model's embedding size
 }
@@ -86,12 +86,16 @@ impl LlamaService {
 
             for (i, point) in search_results.result.iter().enumerate() {
                 // Extract title and content from payload
-                let title = point.payload.get("title")
+                let title = point
+                    .payload
+                    .get("title")
                     .and_then(|v| v.as_str())
                     .map(|v| v.to_string())
                     .unwrap_or_else(|| "Untitled".to_string());
 
-                let content = point.payload.get("content")
+                let content = point
+                    .payload
+                    .get("content")
                     .and_then(|v| v.as_str())
                     .map(|v| v.to_string())
                     .unwrap_or_else(|| "No content".to_string());
@@ -104,11 +108,12 @@ impl LlamaService {
                 };
 
                 // Add to context
-                context.push_str(&format!("Note {}: {} (relevance: {:.2})\n{}\n\n",
-                                          i + 1,
-                                          title,
-                                          point.score,
-                                          content_snippet
+                context.push_str(&format!(
+                    "Note {}: {} (relevance: {:.2})\n{}\n\n",
+                    i + 1,
+                    title,
+                    point.score,
+                    content_snippet
                 ));
             }
         }
@@ -121,8 +126,7 @@ impl LlamaService {
         {}\n\n\
         User question: {}\n\
         Helpful answer:",
-            context,
-            user_query
+            context, user_query
         );
 
         // Step 5: Generate completion with the augmented prompt
