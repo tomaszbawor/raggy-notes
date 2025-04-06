@@ -15,7 +15,7 @@ tokio = { version = "1.44.0", features = ["full"] }
 uuid = { version = "1.16.0", features = ["v4"] }
 xdg = { version = "2.5.2", features = ["serde"] }
 ratatui = "0.29.0"
-crossterm = "0.28.1"
+crossterm = "0.29.0"
 thiserror = "2.0.12"
 chrono = { version = "0.4.40", features = ["serde"] }
 directories = "6.0.0"
